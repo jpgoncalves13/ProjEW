@@ -1,0 +1,95 @@
+extends layout
+
+block content
+    script(src='https://unpkg.com/axios/dist/axios.min.js')
+    script. 
+        const user = !{JSON.stringify(user)}
+        const favoritos = !{JSON.stringify(favoritos)};
+        const acordaoId = !{processo._id}
+    div(style="display:block; content:''; height: 60px;")#topo
+    // Navbar
+    // Modal
+    #docModal.modal.fade(tabindex='-1', aria-labelledby='exampleModalLabel', aria-hidden='true')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    h1#exampleModalLabel.modal-title.fs-5 Insira Documento
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                form(action='/files' method="POST" enctype="multipart/form-data")
+                    .modal-body
+                        input(type="file" name="myFile")
+                    .modal-footer
+                        button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Fechar
+                        button.btn.btn-primary(value='send' type='submit') Submeter Documento
+    // Navbar
+    include navbar.pug
+    +includeNavBar(user)
+
+    section.py-5.text-center
+        .container
+            h1.py-5 Acordão
+                button.btn#fav-button
+                    i#fav-icon(style="color: #e8e117")
+            .description
+                form.input-group.mb-3(action='/description/'+user.id+'/'+processo._id method="POST")
+                    textarea.form-control.description-input#description(name="description" type="text" placeholder="Adicione uma descrição")
+                    button.btn.btn-secondary.add-description-button(value='send' type='submit') Adicionar Descrição
+            .row
+                  .col-md-3.py-5.text-start
+                        .d-flex.justify-content-center.mb-3
+                            a.list-group-item.list-group-item-action(href="#descritores") Descritores
+                        .d-flex.justify-content-center.mb-3
+                            a.list-group-item.list-group-item-action(href="#sumario") Sumário
+                        .d-flex.justify-content-center.mb-3    
+                            a.list-group-item.list-group-item-action(href="#parcial") Decisão Parcial 
+                        .d-flex.justify-content-center.mb-3
+                            a.list-group-item.list-group-item-action(href="#integral") Decisão Integral
+                        .d-flex.justify-content-center.mb-3
+                            a.list-group-item.list-group-item-action(href="#topo") Voltar ao topo
+                        .d-flex.justify-content-center.mb-3
+                            a.list-group-item.list-group-item-action(href="#topo") Apêndices
+                        
+                        each processo in apendices
+                            .d-flex.justify-content-center.mb-3
+                                a.list-group-item.list-group-item-action(href="/acordaos/"+processo._id) #{processo['Data do Acordão']}
+                  .col-md-9.py-5
+                    section.text-start#descritores 
+                        h1.text-primary= processo.Processo
+                        hr.text-primary
+                        p #[b Relator:] #{processo.Relator ? processo.Relator : 'N/A'}
+                        p #[b Descritores:] #{processo.Descritores ? processo.Descritores : 'N/A'}
+                        p #[b Processo:] #{processo.Processo ? processo.Processo : 'N/A'}
+                        p #[b Nº Convencional:] #{processo['Nº Convencional'] ? processo['Nº Convencional'] : 'N/A'}
+                        p #[b Data do Acordão:] #{processo['Data do Acordão'] ? processo['Data do Acordão'] : 'N/A'}
+                        p #[b Votação:] #{processo['Votação'] ? processo['Votação'] : 'N/A'}
+                        p #[b Texto Integral:] #{processo['Texto Integral'] ? processo['Texto Integral'] : 'N/A'}
+                        p #[b Nível de acesso:] #{processo['Nível de acesso'] ? processo['Nível de acesso'] : 'N/A'}
+                        p #[b Meio Processual:] #{processo['Meio Processual'] ? processo['Meio Processual'] : 'N/A'}
+                        p #[b Decisão:] #{processo['Decisão'] ? processo['Decisão'] : 'N/A'}
+                        p #[b Indicações eventuais:] #{processo['Indicações eventuais'] ? processo['Indicações eventuais'] : 'N/A'}  
+                        p #[b Url:] 
+                            a(href='http://www.dgsi.pt' + processo['url']) #{processo['url'] ? processo['url'] : 'N/A'}  
+                               
+                        each val in Object.entries(processo).filter(([key]) => !['url', '_id', 'Relator', 'Descritores', 'Processo', 'Nº Convencional', 'Data do Acordão', 'Votação', 'Texto Integral', 'Nível de acesso', 'Meio Processual', 'Decisão', 'Indicações eventuais', 'Sumário', 'Decisão Texto Parcial', 'Decisão Texto Integral' ].includes(key))  
+                                p #[b #{val[0]}:]  #{val[1] ? val[1] : 'N/A'}
+
+                    section.text-start#sumario.mt-2 
+                        h1.text-primary Sumário
+                        hr.text-primary
+                        p #{processo['Sumário'] ? processo['Sumário'] : 'N/A'}
+                    section.text-start#parcial.mt-2 
+                        h1.text-primary Decisão Texto Parcial 
+                        hr.text-primary
+                        p #{processo['Decisão Texto Parcial'] ? processo['Decisão Texto Parcial'] : 'N/A'}
+                    section.text-start#integral.mt-2 
+                        h1.text-primary Decisão Texto Integral
+                        hr.text-primary
+                        p #{processo['Decisão Texto Integral'] ? processo['Decisão Texto Integral'] : 'N/A'}
+    script(type="text/javascript" src="/public/js/favoritos.js")
+    // Footer
+    footer.p-3.bg-light.text-center.mt-auto.position-relative.shadow
+        .container 
+            p.lead Copyright &copy; 2023 EngWeb, Acordãos
+            a.position-absolute.bottom-0.end-0.p-3(href="#")
+                i.fa-solid.fa-circle-arrow-up.h3(style="color: grey;")
+

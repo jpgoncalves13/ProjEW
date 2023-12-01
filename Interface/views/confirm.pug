@@ -1,0 +1,11 @@
+mixin includeConfirm(confirmUrl, idName)
+    .modal.fade(id=idName, tabindex='-1', aria-labelledby='exampleModalLabel', aria-hidden='true')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    h1#exampleModalLabel.modal-title.fs-5 Tem a certeza de que quer continuar?
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                .modal-footer
+                    button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Não
+                    button.btn.btn-primary #[a href="#{confirmUrl}" Sim] 
+                    

@@ -1,0 +1,47 @@
+extends layout
+
+block content
+  section.vh-100
+    .container.py-5.h-100
+      .row.d-flex.justify-content-center.align-items-center.h-100
+        .col-12.col-md-8.col-lg-6.col-xl-5
+          .card.shadow-lg
+            .card-body.p-5.text-center
+              h1.mb-4.text-center Registo
+              form.text-sm-start(action="/users/register" method="POST")
+                .row.mb-4 
+                  .col-md-6
+                    .form-group 
+                      label.form-label Primeiro Nome
+                      input.form-control(type="text" placeholder="Insira o Primeiro Nome" name="name")
+                  .col-md-6
+                    .form-group 
+                      label.form-label Último Nome
+                      input.form-control(type="text" placeholder="Insira o Último Nome" name="surname")
+                .form-group.mb-4 
+                  label.form-label Nome de Utilizador
+                  input.form-control(type="text" placeholder="Insira o Nome de Utilizador" name="username" required)
+                .form-group.mb-4 
+                  label.form-label Email
+                  input.form-control#email1(type="email" placeholder="Insira o Email" name="email" required)
+                  if (error)
+                    label.form-label.text-danger.px-2 Email já em uso
+                .form-group.mb-4 
+                  label.form-label Palavra-Passe
+                  input.form-control#password1(type="password" placeholder="Insira a Palavra-Passe" name="password" required)
+                .form-group.mb-4 
+                  label.form-label(for='Função') Função
+                  select.select.form-control(name="level" required)
+                    option(value="consumer") Consumidor 
+                    option(value="producer") Produtor 
+                .text-center
+                  button.mb-3.btn.btn-primary.w-50.mb-4(type="submit") Criar Conta
+              .text-center.mb-4
+                p Ou inicia sessão com:
+                a.btn.btn-link.btn-floating(href="/users/facebook")
+                  i.fa-brands.fa-facebook.fa-xl 
+                a.btn.btn-link.btn-floating(href="/users/google")
+                  i.fa-brands.fa-google.fa-xl
+              .text-center 
+                p.mb-0 Já possui conta?  
+                  a.fw-bold.pl-2.text-secondary(href="/users/login") Iniciar Sessão

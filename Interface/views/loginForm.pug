@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  section.vh-100
+    .container.py-5.h-100
+      .row.d-flex.justify-content-center.align-items-center.h-100
+        .col-12.col-md-8.col-lg-6.col-xl-5
+          .card.shadow-lg
+            .card-body.p-5.text-center
+              h1.mb-4 Iniciar Sessão
+              form.text-sm-start(action="/users/login" method="POST")
+                .form-group.mb-4 
+                  label.form-label Nome de Utilizador
+                  input.form-control(type="text" placeholder="Insira o Nome de Utilizador" name="username" required)
+                .form-group.mb-4 
+                  label.form-label Palavra-Passe 
+                  input.form-control(type="password" placeholder="Insira a Palavra-Passe" name="password" required)
+                  if (error === 1)
+                    label.form-label.text-danger.px-2 Password errada
+                  else if (error === 2)
+                    label.form-label.text-danger.px-2 Utilizador desativado
+                  p.text-center.small.my-3 
+                    a.text-secondary(href="/users/resetPassword") Esqueceu-se da palavra-passe?
+                .text-center
+                  button.mb-3.btn.btn-primary.w-50.mb-4(type="submit") Iniciar Sessão         
+              .text-center.mb-4 
+                p Ou inicia sessão com:
+                a.btn.btn-link.btn-floating(href="/users/facebook")
+                  i.fa-brands.fa-facebook.fa-xl 
+                a.btn.btn-link.btn-floating(href="/users/google")
+                  i.fa-brands.fa-google.fa-xl
+              .text-center 
+                p.mb-0 Não possui uma conta?  
+                  a.fw-bold.pl-2.text-secondary(href="/users/register") Registe-se

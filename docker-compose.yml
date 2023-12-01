@@ -1,0 +1,55 @@
+version: "3"
+
+services:
+  authentication:
+    container_name: authentication 
+    build:
+      context: ./Authentication
+    environment:
+      - MONGODB_URL=mongodb://mongodb_container:27017/ProjetoEW
+    ports:
+      - "8002:8002"
+    depends_on:
+      - mongo
+    networks:
+      - acordaosnet
+
+  interface:
+    environment:
+      - API_URL=http://api:8001/api
+      - AUTH_URL=http://authentication:8002/users
+      - SELF_URL=http://localhost:8003/
+    build:
+      context: ./Interface
+    ports:
+      - "8003:8003"
+    depends_on:
+      - mongo
+    networks:
+      - acordaosnet
+  api:
+    environment:
+      - MONGODB_URL=mongodb://mongodb_container:27017/ProjetoEW
+    container_name: api
+    build:
+      context: ./API
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mongo
+    networks:
+      - acordaosnet
+  mongo:
+    container_name: mongodb_container
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/db
+    networks:
+      - acordaosnet
+networks:
+  acordaosnet:
+    name: acordaosnet
+
+    driver: bridge

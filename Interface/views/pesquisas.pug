@@ -1,0 +1,330 @@
+extends layout
+
+block content
+    script(src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.2/dist/algoliasearch-lite.umd.js" integrity="sha256-X2G+vjV8i6Jj2NSGFTvy6Z4q2AlmF5aH0HiIpWJ8eU4=" crossorigin="anonymous")
+    script(src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.56.1/dist/instantsearch.production.min.js" integrity="sha256-lz9C+x8+6w2rh56x5TrH5iYmE4Js2FiJS5h0tuMz7hQ=" crossorigin="anonymous")
+    div(style="display:block; content:''; height: 60px;")
+    // Modal
+    #docModal.modal.fade(tabindex='-1', aria-labelledby='exampleModalLabel', aria-hidden='true')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    h1#exampleModalLabel.modal-title.fs-5 Insira Documento
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                form(action='/files' method="POST" enctype="multipart/form-data")
+                    .modal-body
+                        input(type="file" name="myFile")
+                    .modal-footer
+                        button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Fechar
+                        button.btn.btn-primary(value='send' type='submit') Submeter Documento
+    // Navbar
+    include navbar.pug
+    +includeNavBar(user)
+
+    // Acordãos
+    section.py-5.text-center
+        .container
+            h1.py-5 Pesquisas
+            .row
+                  .col-md-3.py-5 
+                    .d-flex.justify-content-center.mb-3.mt-2 
+                        #searchbox
+                    .d-flex.justify-content-center.mb-3    
+                        #searchboxProcesso
+                    .d-flex.justify-content-center.mb-3  
+                        #searchboxRelator
+                    .d-flex.justify-content-center.mb-3  
+                        #searchboxDescritores
+                    .d-flex.justify-content-center.mb-3  
+                        #sort-by
+                    .accordion.w-100#refAccordion
+                            .accordion-item 
+                                h2.accordion-header#headingOne 
+                                    button.accordion-button(type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne") Relator
+                                #collapseOne.accordion-collapse.collapse.show(aria-labelledby='headingOne' data-bs-parent='#refAccordion')
+                                    .accordion-body
+                                        #refinement-list1
+                            .accordion-item 
+                                h2.accordion-header#headingTwo 
+                                    button.accordion-button(type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo") Tribunal
+                                #collapseTwo.accordion-collapse.collapse.show(aria-labelledby='headingTwo' data-bs-parent='#refAccordion')
+                                    .accordion-body
+                                        #refinement-list2
+                            .accordion-item 
+                                h2.accordion-header#headingThree 
+                                    button.accordion-button(type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree") Requerente
+                                #collapseThree.accordion-collapse.collapse.show(aria-labelledby='headingThree' data-bs-parent='#refAccordion')
+                                    .accordion-body
+                                        #refinement-list3
+                  .col-md-9.py-5
+                    .w-100    
+                        #hits
+                    .d-flex.justify-content-center
+                        #pagination.my-3
+    // Footer
+    footer.p-3.bg-light.text-center.mt-auto.position-relative.shadow
+        .container 
+            p.lead Copyright &copy; 2023 EngWeb, Acordãos
+            a.position-absolute.bottom-0.end-0.p-3(href="#")
+                i.fa-solid.fa-circle-arrow-up.h3(style="color: grey;")
+    script.
+        const searchClient = algoliasearch('3U240B9PZS', '2fcb4365959ca67208f80ef5792f2990');
+
+        const search1 = instantsearch({
+            indexName: 'Acordaos',
+            searchClient,
+        });
+
+        const search2 = instantsearch({
+            indexName: 'Acordaos',
+            searchClient,
+            searchFunction(helper) {
+                if (helper.state.query) {
+                    helper.setQueryParameter('restrictSearchableAttributes', ['Processo'])
+                    helper.search();
+                }
+                else{
+                    helper.setQuery('').setQueryParameter('restrictSearchableAttributes', []);
+                    helper.search();
+                }
+            },
+        });
+
+        const search3 = instantsearch({
+            indexName: 'Acordaos',
+            searchClient,
+            searchFunction(helper) {
+                if (helper.state.query) {
+                    helper.setQueryParameter('restrictSearchableAttributes', ['Relator'])
+                    helper.search();
+                }
+                else{
+                    helper.setQuery('').setQueryParameter('restrictSearchableAttributes', []);
+                    helper.search();
+                }
+                
+            },
+        });
+
+        const search4 = instantsearch({
+            indexName: 'Acordaos',
+            searchClient,
+            searchFunction(helper) {
+                if (helper.state.query) {
+                    helper.setQueryParameter('restrictSearchableAttributes', ['Descritores'])
+                    helper.search();
+                }
+            },
+        });
+
+        function truncateText(text, maxLength) {
+            if (text) {
+                if (text.length > maxLength) {
+                    return text.slice(0, maxLength) + '...';
+                }
+                return text;
+            } else {
+                return 'N/A'
+            }
+        }
+
+        const hits = instantsearch.widgets.hits({
+                container: '#hits',
+                cssClasses: {
+                    root: 'm-0',
+                    list: 'list-group list-group-flush ',
+                    item: 'list-group-item'
+                },
+                transformItems(items) {
+                    return items.map(item => {
+                        if (!item['Relator']) {
+                            item['Relator'] = 'N/A'; // Substitui por 'N/A'
+                        }
+                        return item;
+                    });
+                },
+                templates: {
+                    empty: '<p>Não encontramos nenhum resultado</p> ',
+                    item: (hit, { html, components }) =>{
+                        if (hit._highlightResult['Sumário']) 
+                            hit._highlightResult['Sumário'].value = truncateText(hit._highlightResult['Sumário'].value, 500);
+                        else{
+                            if (!hit['Sumário']){
+                                hit['Sumário'] = "N/A"
+                            }
+                        }
+                        if (!hit._highlightResult['Relator']) {
+                            if (!hit['Relator']){
+                                hit['Relator'] = "N/A"
+                            }
+                        }
+                        if (!hit._highlightResult['Data do Acordão']) {
+                            if (!hit['Data do Acordão']){
+                                hit['Data do Acordão'] = "N/A"
+                            }
+                        }
+                        if (!hit._highlightResult['Áreas Temáticas']){
+                            if (hit['Áreas Temáticas'].length === 0){
+                                hit['Áreas Temáticas'] = "N/A"
+                            }
+                        }
+                        if (!hit._highlightResult['Descritores']){
+                            if (!hit['Descritores']){
+                                hit['Descritores'] = "N/A"
+                            }
+                        }
+                        return html`
+                        <div class="card mb -2"> <div class="card-body">
+                        <h5 class="text-start text-primary"><a href="/acordaos/${hit._id}">${components.Highlight({ hit, attribute: 'Processo' })}</a></h1>
+                        <div class="row pb-2">
+                            <div class="col-md-4"> 
+                                <div class="text-start"> <b>Tribunal:</b> ${components.Highlight({ hit, attribute: 'tribunal' })}</div>
+                            </div>
+                            <div class="col-md-4"> 
+                                <div class="text-start"> <b>Relator:</b> ${hit._highlightResult['Relator'] ? components.Highlight({ hit, attribute: 'Relator' }) : hit['Relator']} </div>
+                            </div>
+                            <div class="col-md-4"> 
+                                <div class="text-start"> <b>Data do Acordão:</b> ${hit._highlightResult['Data do Acordão'] ? components.Highlight({ hit, attribute: 'Data do Acordão' }) : hit['Data do Acordão']}</div>
+                            </div>
+                        </div>
+                        <div class="text-start pb-2"> <b>Áreas Temáticas:</b> ${hit._highlightResult['Áreas Temáticas'] ? components.Highlight({ hit, attribute: 'Áreas Temáticas' }) : hit['Áreas Temáticas']}</div>
+                        <div class="text-start pb-2"> <b>Descritores:</b> ${hit._highlightResult['Descritores'] ? components.Highlight({ hit, attribute: 'Descritores' }) : hit['Descritores']}</div>
+                        <div class="text-start pb-2">
+                            <b>Sumário:</b> ${hit._highlightResult['Sumário'] ? components.Highlight({ hit, attribute: 'Sumário' }) : hit['Sumário']} 
+                        </div>
+                        </div>
+                        </div>
+                    `
+                    }
+                }
+        });
+
+        const refinementList1 = instantsearch.widgets.refinementList({
+            container: '#refinement-list1',
+            attribute: 'Relator',
+            cssClasses : {
+                root : 'text-start m-0 p-0',
+                list : 'm-0 p-0',
+                item : 'list-group-item',   
+                checkbox : 'form-check-input me-2',
+                label : 'form-check-label',
+                count: 'badge bg-secondary rounded-pill ms-2'
+            }
+        });
+
+        const refinementList2 = instantsearch.widgets.refinementList({
+            container: '#refinement-list2',
+            attribute: 'tribunal',
+            cssClasses : {
+                root : 'text-start',
+                item : 'list-group-item',   
+                checkbox : 'form-check-input me-2',
+                label : 'form-check-label',
+                count: 'badge bg-secondary rounded-pill ms-2'
+            }
+        });
+
+        const refinementList3 = instantsearch.widgets.refinementList({
+            container: '#refinement-list3',
+            attribute: 'Requerente',
+            cssClasses : {
+                root : 'text-start',
+                item : 'list-group-item',   
+                checkbox : 'form-check-input me-2',
+                label : 'form-check-label',
+                count: 'badge bg-secondary rounded-pill ms-2'
+            }
+        });
+
+        const pagination = instantsearch.widgets.pagination({
+            container: '#pagination',
+            cssClasses: {
+                selectedItem: 'page-item active',
+                disabledItem: 'page-item disabled',
+                list: 'pagination',
+                item: 'page-item',
+                link: 'page-link'
+            }
+        });
+
+        
+        
+        const searchBox1 = instantsearch.widgets.searchBox({
+                container: '#searchbox',  
+                placeholder: 'Pesquisa Livre...',
+                showSubmit: false,
+                showReset: false,
+                cssClasses: {
+                    root: 'input-group',    
+                    input : 'form-control', 
+                }
+        });
+        
+        const searchBox2 = instantsearch.widgets.searchBox({
+                container: '#searchboxProcesso',  
+                placeholder: 'Número do Processo...',
+                showSubmit: false,
+                showReset: false,
+                cssClasses: {
+                    root: 'input-group',
+                    input : 'form-control', 
+                }
+        });
+        
+        const searchBox3 = instantsearch.widgets.searchBox({
+                container: '#searchboxRelator',  
+                placeholder: 'Pesquisar por Relator...',
+                queryHook(query, search) {
+
+                    search(query);
+                },
+                showSubmit: false,
+                showReset: false,
+                cssClasses: {
+                    root: 'input-group',
+                    input : 'form-control', 
+                }
+        });
+        
+        
+        const searchBox4 = instantsearch.widgets.searchBox({
+                container: '#searchboxDescritores',  
+                placeholder: 'Pesquisar por Descritores...',
+                restrictSearchableAttributes: ['Descritores'],
+                showSubmit: false,
+                showReset: false,
+                cssClasses: {
+                    root: 'input-group',
+                    input : 'form-control', 
+                }
+        });
+
+        const sort = instantsearch.widgets.sortBy({
+            container: '#sort-by',
+            items: [
+                { label: 'Featured', value: 'Acordaos' },
+                { label: 'Relator (asc)', value: 'Acordaos_Relator_asc' },
+                { label: 'Relator (desc)', value: 'Acordaos_Relator_desc' },
+            ], 
+            cssClasses: {
+                    select : 'form-select'
+                }
+        });
+
+        search1.addWidgets([searchBox1, refinementList1, refinementList2, refinementList3, hits, pagination, sort]);
+        search2.addWidgets([searchBox2, refinementList1, refinementList2, refinementList3, hits, pagination, sort]);
+        search3.addWidgets([searchBox3, refinementList1, refinementList2, refinementList3, hits, pagination, sort]);
+        search4.addWidgets([searchBox4, refinementList1, refinementList2, refinementList3, hits, pagination, sort]);
+        
+        search1.start();     
+        search2.start();     
+        search3.start();     
+        search4.start();     
+
+
+                        
+
+
+                
+        
+    

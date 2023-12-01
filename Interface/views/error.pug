@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  .error-page
+    i.fa-solid.fa-triangle-exclamation.fa-2xl(style="color: #e01b24;").my-5.mx-4
+    h1.error-message.mx-4= message
+    h2.error-status.mx-4= error.status
+    pre.error-stack.mx-4= error.stack
+    a(href="/")
+      button.mx-4.my-4.btn.btn-primary(type='button') Voltar à página principal
+

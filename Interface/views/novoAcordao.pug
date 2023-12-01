@@ -1,0 +1,128 @@
+extends layout
+
+block content
+
+    script. 
+        var url = '#{url}';
+    div(style="display:block; content:''; height: 60px;")#topo
+    // Modal
+    #docModal.modal.fade(tabindex='-1' aria-labelledby='exampleModalLabel' aria-hidden='true')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    h1#exampleModalLabel.modal-title.fs-5 Insira Documento
+                    button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                form(action='/files' method="POST" enctype="multipart/form-data")
+                    .modal-body
+                        input(type="file" name="myFile")
+                    .modal-footer
+                        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Fechar
+                        button.btn.btn-primary(value='send' type='submit') Submeter Documento
+    // Navbar
+    include navbar.pug
+    +includeNavBar(user)
+
+    section.py-5
+      .container
+          .row.text-start
+            .col-md-6
+              h4.py-5 Selecione o campo
+              form#form(method='POST' action='/acordaos/novo')      
+                select.form-select.mb-3#selectElement
+                  option(value="default" selected) Escolher...
+                  each elem, index in ["Data do Acordão", "Data de Entrada", "Ano da Publicação", "Data", "Data do Apêndice", "Data Dec. Recorrida", "Data do Diário da Republica", "Data da Decisão", "Data da Decisão Sumária", "Data da Reclamação", "Data da Decisão Singular", "Nº do Documento", "Nº Convencional", "Nº do Volume", "Nº Processo/TAF", "Nº do Diário da Republica", "Nº do Boletim do M.J.", "Nº Único do Processo", "1ª Pág. de Publicação do Acordão", "Página", "Página do Diário da República", "Página do Volume", "Página do Boletim do M.J.", "tribunal", "Tribunal", "Tribunal Recurso", "Tribunal Recorrido", "Processo no Tribunal Recurso", "Processo no Tribunal Recorrido", "Tribunal 1ª Instância", "Processo", "Texto Integral", "Decisão", "Sumário", "Decisão Texto Integral", "Reclamações", "Indicações Eventuais", "Juízo ou Seccção", "Apêndice", "Texto Parcial", "Parecer Ministério Publico", "Referência a Pareceres", "Legislação Comunitária", "Referências Internacionais", "Normas Declaradas Inconst.", "Normas Suscitadas", "Texto das Cláusulas Abusivas", "Jurisprudência Constitucional", "Observações", "Jurisprudência Estrangeira", "Referência Processo", "Outra Jurisprudência", "Referência a Doutrina", "Referências de Publicação", "Jurisprudência Internacional", "Legislação Estrangeira", "Outra Jurisprudência", "url", "Descritores", "Relator", "Votação", "Meio Processual", "Privacidade", "Legislação Nacional", "Áreas Temáticas", "Recorrente", "Recorridos", "Jurisprudência Nacional", "Objeto", "Espécie", "Acordão", "Requerente", "Requerido", "Magistrado", "Contencioso", "Sub-Seccção", "Normas Apreciadas", "Constituição", "Série do Diário da República", "Disponível na JTCA", "Voto Vencido", "Apenso", "Recusa Aplicação", "Declaração de Voto", "Recurso", "Autor", "Réu", "Tipo de Contrato", "Tipo de Ação", "Volume dos Acordãos do T.C.", "Outras Publicações", "Peça Processual", "Tema"].sort()
+                    option(value='"' + index + '\"')= elem
+                
+                .from-control.mb-3#textBoxContainer(style="display: none;")
+                  textarea.form-control#textBox(type="text" style="height: 200px")
+                
+                button.btn.btn-primary(type="submit") Enviar Acordão 
+            .col-md-6
+              h4.py-5 Acordão a inserir
+              #selectionResult
+
+      script.
+            let selectedValues = {}; // Armazena os valores selecionados
+            
+            // Esconde ou não o Input 
+            document.getElementById("selectElement").addEventListener("change", () => {
+              let selectElement = document.getElementById("selectElement");
+              let selectedValue = selectElement.value;
+              let textBoxContainer = document.getElementById("textBoxContainer");
+              let selectedOption = selectElement.options[selectElement.selectedIndex].textContent;
+
+              if (selectedValue === "default") {
+                textBoxContainer.style.display = "none";
+              } else {
+                textBoxContainer.style.display = "block";
+              }
+
+              let textBox = document.getElementById("textBox");
+              if (selectedValues[selectedOption]) {
+                textBox.value = selectedValues[selectedOption]
+              } else {
+                textBox.value = ""
+              }
+
+              
+            });
+
+            // Atualiza o texto selecionado ao modificar o campo de entrada
+            document.getElementById("textBox").addEventListener("input" , () => {
+              let selectElement = document.getElementById("selectElement");
+              let selectedOption = selectElement.options[selectElement.selectedIndex].textContent;
+              let valueOption = document.getElementById("textBox").value;
+              let selectionResult = document.getElementById("selectionResult");
+              
+              if (selectedOption.startsWith("Data")) {
+                  // Verifica se o valor inserido está vazio ou não
+                  valueOption = valueOption.trim()
+                  if (valueOption !== "") {
+                    // Verifica se o valor está no formato "DD/MM/AAAA"
+                    if (!isValidDateFormat(valueOption)) {
+                      // Define o valor conforme o formato desejado "DD/MM/AAAA"
+                      valueOption = "";
+                    }
+                  }
+              }
+
+              selectedValues[selectedOption] = valueOption;
+              console.log(selectedValues)
+              selectionResult.innerHTML = '';
+              for (var campo in selectedValues) {
+                selectionResult.innerHTML += `
+                  <p><b>${campo}:</b> ${selectedValues[campo]}</p>
+                `
+              }
+            });
+
+            function isValidDateFormat(value) {
+              // Verifica se o valor está no formato "DD/MM/AAAA"
+              let pattern = /^\d{2}\/\d{2}\/\d{4}$/;
+              return pattern.test(value);
+            }
+            
+            document.getElementById("form").addEventListener("submit" , (event) => {
+              event.preventDefault(); // Impede o envio do formulário
+
+              // Cria elementos input ocultos e adiciona-os ao formulário
+              for (let key in selectedValues) {
+                if (selectedValues.hasOwnProperty(key)) {
+                  let input = document.createElement("input");
+                  input.setAttribute("type", "hidden");
+                  input.setAttribute("name", key);
+                  input.setAttribute("value", selectedValues[key]);
+                  document.getElementById("form").appendChild(input);
+                }
+              }
+
+              // Envie o formulário com os valores adicionados
+              document.getElementById("form").submit();
+            });
+
+    // Footer              
+    footer.p-3.bg-light.text-center.mt-auto.position-relative.shadow
+        .container 
+            p.lead Copyright &copy; 2023 EngWeb, Acordãos
+            a.position-absolute.bottom-0.end-0.p-3(href="#")
+                i.fa-solid.fa-circle-arrow-up.h3(style="color: grey;")

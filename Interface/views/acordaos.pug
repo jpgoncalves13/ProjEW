@@ -1,0 +1,73 @@
+extends layout
+
+block content
+    script. 
+        let editable = !{editable}
+        let user = !{JSON.stringify(user)}
+        let favorites = false
+        if (user && user.level === 'admin'){
+            editable = true
+        }
+        let favoritos
+        var url = '#{url}';
+    div(style="display:block; content:''; height: 60px;")#topo
+    // Modal
+    #docModal.modal.fade(tabindex='-1', aria-labelledby='exampleModalLabel', aria-hidden='true')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    h1#exampleModalLabel.modal-title.fs-5 Insira Documento
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                form(action='/files' method="POST" enctype="multipart/form-data")
+                    .modal-body
+                        input(type="file" name="myFile")
+                    .modal-footer
+                        button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Fechar
+                        button.btn.btn-primary(value='send' type='submit') Submeter Documento
+                        
+                    
+    // Navbar
+    include navbar.pug
+    +includeNavBar(user)
+    
+    // Acordãos
+    section.py-5.text-center
+        .container
+            h1.py-5 Acordãos
+            .row
+                  .col-md-3.py-5 
+                    .d-flex.justify-content-center
+                        input.mt-2.mb-3.form-control(type='search' placeholder="Pesquisa Livre..." id="searchLivre")
+                    .d-flex.justify-content-center
+                        input.mb-3.form-control(type='search' placeholder="Número do Processo..." id="searchProcesso")
+                    .d-flex.justify-content-center
+                        input.mb-3.form-control(type='search' placeholder="Pesquise por Relator..." id="searchRelator")
+                    .d-flex.justify-content-center
+                        input.mb-3.form-control(type='search' placeholder="Pesquise por Descritores..." id="searchDescritores")
+                    select.form-select.mb-3#selectElement
+                        option(selected) Ordenar por...
+                        option(value="Data asc") Ordenar por data (asc)
+                        option(value="Data desc") Ordenar por data (desc)
+                        option(value="Relator asc") Ordenar por relator (asc)
+                        option(value="Relator desc") Ordenar por relator (desc)
+                  .col-md-9.py-5
+                    .w-100 
+                        ul.list-group.list-group-flush#resultsList 
+                    .d-flex.justify-content-center
+                        // Pagination
+                        nav
+                            ul.pagination
+                                li.page-item
+                                    a(href="#topo").page-link#previous Previous
+                                li.page-item
+                                    a(href="#topo").page-link#next Next
+
+    script(type="text/javascript" src="/public/js/myScript.js")
+    // Footer              
+    footer.p-3.bg-light.text-center.mt-auto.position-relative.shadow
+        .container 
+            p.lead Copyright &copy; 2023 EngWeb, Acordãos
+            a.position-absolute.bottom-0.end-0.p-3(href="#")
+                i.fa-solid.fa-circle-arrow-up.h3(style="color: grey;")
+
+

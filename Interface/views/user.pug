@@ -1,0 +1,83 @@
+extends layout 
+
+block content 
+    script. 
+        var url = ''
+    div(style="display:block; content:''; height: 60px;")
+    // Modal
+    #docModal.modal.fade(tabindex='-1', aria-labelledby='exampleModalLabel', aria-hidden='true')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    h1#exampleModalLabel.modal-title.fs-5 Insira Documento
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                form(action='/files' method="POST" enctype="multipart/form-data")
+                    .modal-body
+                        input(type="file" name="myFile")
+                    .modal-footer
+                        button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Fechar
+                        button.btn.btn-primary(value='send' type='submit') Submeter Documento
+    // Navbar
+    include navbar.pug
+    +includeNavBar(user)
+                            
+    .container
+        .row
+          .col-md-4.m-5.card.shadow
+            .text-center.align-items-center.p-5.card-body
+              img.rounded-circle.mt-5(width='150px' src='https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg')
+              p= user.name + ' ' + (user.surname || '')
+              p= user.email
+              .mt-5
+              a.btn.btn-primary.w-50(href='/users/history/'+user._id) Histórico
+              .mb-3
+              a.btn.btn-primary.w-50(href='/users/favorites/'+user._id) Favoritos
+              .mb-3 
+              a.btn.btn-danger.w-50(href='/users/deleteUser/'+user._id) Eliminar Conta
+
+            if change
+                #popup.mb-6(style="margin-bottom:55%")
+                    .alert.alert-success(role='alert')
+                        | As alterações foram guardadas com sucesso.
+
+          .col-md-6.m-5.p-5.card.shadow
+            .card-tittle.text-center
+              h4 Configurações do perfil
+            .text-start.align-items-center.card-body
+              form(action='/users/' + user._id method='POST')
+                .mb-3
+                  label.form-label Primeiro Nome
+                  input.form-control(type='text' value=user.name placeholder='Primeiro Nome' name='name')
+                .mb-3
+                  label.form-label Apelido
+                  input.form-control(type='text' value=user.surname placeholder='Apelido' name='surname')
+                .mb-3
+                  label.form-label Username
+                  input.form-control(type='text' value=user.username placeholder='Username' name='username' disabled)
+                .mb-3
+                  label.form-label Email
+                  input.form-control(type='text' value=user.email placeholder='Email' name='email' disabled)
+                .mb-3
+                  label.form-label Função
+                  input.form-control(type='text' value=user.level disabled name='level')
+                .mb-3
+                  label.form-label Data de Criação da Conta
+                  input.form-control(type='text' disabled value=user.dateCreated name='dateCreated')
+                .mb-3
+                  label.labels Data do Último Acesso
+                  input.form-control(type='text' disabled value=user.dateLastAccess name='dateLastAccess')
+                .mb-3
+                  label.labels ID do Provedor
+                  input.form-control(type='text' disabled value=user.providerId name='providerId')
+                .mb-3
+                  label.labels Provedor
+                  input.form-control(type='text' disabled value=user.provider name='provider')
+                .mb-3  
+                button#saveChangesBtn.btn.btn-primary.profile-button(type='submit') Guardar Alterações
+                
+    // Footer
+    footer.p-3.bg-light.text-center.mt-auto.position-relative.shadow
+        .container 
+            p.lead Copyright &copy; 2023 EngWeb, Acordãos
+            a.position-absolute.bottom-0.end-0.p-3(href="#")
+                i.fa-solid.fa-circle-arrow-up.h3(style="color: grey;")

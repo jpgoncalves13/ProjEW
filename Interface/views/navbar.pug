@@ -1,0 +1,33 @@
+mixin includeNavBar(user)
+    nav.navbar.navbar-expand-lg.navbar-light.bg-white.py-3.shadow.fixed-top
+        .container
+            a.navbar-brand(href='/') Acordãos   
+            button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navmenu')
+                span.navbar-toggler-ico 
+            .navbar-collapse.collapse#navmenu
+                ul.navbar-nav.ms-auto
+                    if user && (user.level === 'admin' || user.level === 'producer')
+                        li  
+                            a.nav-item.nav-link(href="/acordaos/novo") Criar Acordão
+                    if user && user.level === 'producer'
+                        //Button trigger modal 
+                        a.nav-item.nav-link(href="/acordaosProducer/" + user.id) Acordãos do produtor
+                    if user && user.level === 'admin'
+                        li 
+                            // Button trigger modal 
+                            a.nav-item.nav-link(type='button', data-bs-toggle='modal', data-bs-target='#docModal') Inserir Documento
+                        li 
+                            // Button trigger modal 
+                            a.nav-item.nav-link(href="/users") Consultar utilizadores
+                    if user
+                        li
+                            a.nav-item.nav-link(href='/pesquisas') Pesquisas 
+                        li
+                            a.nav-item.nav-link(href='/users/' + user.id) Perfil
+                        li
+                            a.nav-item.nav-link(href='/users/logout') Terminar Sessão
+                    else
+                        li 
+                            a.nav-item.nav-link(href='/users/login') Iniciar Sessão
+                        li 
+                            a.nav-item.nav-link(href='/users/register') Criar Conta

@@ -1,0 +1,33 @@
+extends layout
+
+block content
+    div(style="display:block; content:''; height: 60px;")
+    // Modal
+    #docModal.modal.fade(tabindex='-1', aria-labelledby='exampleModalLabel', aria-hidden='true')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    h1#exampleModalLabel.modal-title.fs-5 Insira Documento
+                    button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+                form(action='/files' method="POST" enctype="multipart/form-data")
+                    .modal-body
+                        input(type="file" name="myFile")
+                    .modal-footer
+                        button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Fechar
+                        button.btn.btn-primary(value='send' type='submit') Submeter Documento
+    // Navbar
+    include navbar.pug
+    +includeNavBar(user)
+
+    // Lista de tribunais
+    .container.py-5
+        h2.py-5.text-center Tribunais
+        .list-group 
+            each value, key  in tribunais
+                a.list-group-item.list-group-item-action(href='/acordaos?tribunal=' + key)= value
+    // Footer
+    footer.p-3.text-center.mt-auto.position-relative.bg-light.shadow
+        .container 
+            p.lead Copyright &copy; 2023 EngWeb, Acordãos
+            a.position-absolute.bottom-0.end-0.p-3(href="#")
+                i.fa-solid.fa-circle-arrow-up.h3(style="color: grey;")
